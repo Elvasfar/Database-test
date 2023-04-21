@@ -5,9 +5,100 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="shortcut icon" href="#" type="image/x-icon" />
-    <title>Document</title>
+    <link rel="stylesheet" href="style.css" />
+    <title>Database-App</title>
   </head>
   <body>
+    <!-- <dialog open="" id="create-post">
+      <form action="" method="POST" id="form-create">
+        <label for="name-create">Full Name</label>
+        <input id="name-create" name="fullName" type="text" required />
+        <label for="email-create">E-mail</label>
+        <input id="email-create" name="email" type="email" required />
+        <fieldset id="site-data">
+          <legend>Site Data</legend>
+          <label for="username-create">Username</label>
+          <input
+            id="username-create"
+            name="username"
+            type="text"
+            required
+          /><br />
+          <label for="password-create">Password</label>
+          <input
+            id="password-create"
+            name="password"
+            type="password"
+            required
+          /><br />
+          <label for="retype-password-create">Repeat Password</label>
+          <input id="retype-password-create" type="password" required />
+        </fieldset>
+        <fieldset id="payment-box">
+          <legend>Payment</legend>
+          <label for="radio-create-opt1">Free</label>
+          <input id="radio-create-opt1" type="radio" name="payment" />
+          <label for="radio-create-opt2">Cheap</label>
+          <input id="radio-create-opt2" type="radio" name="payment" />
+          <label for="radio-create-opt3">Fair</label>
+          <input id="radio-create-opt3" checked type="radio" name="payment" />
+          <label for="radio-create-opt4">Expensive</label>
+          <input
+            id="radio-create-opt4"
+            type="radio"
+            name="payment"
+          /><br /><br />
+          <select name="payEvery" id="payment-interval">
+            <option value="week">Week</option>
+            <option value="month">Month</option>
+            <option value="year">Year</option>
+          </select>
+        </fieldset>
+        <label for="email-create-checkbox"
+          ><input
+            id="email-create-checkbox"
+            type="checkbox"
+            checked
+            name="spam"
+          />I would like to receive a ton of e-mails</label
+        >
+        <br />
+        <label for="TC-create-checkbox"
+          ><input id="TC-create-checkbox" type="checkbox" required /> I accept
+          the Terms & Conditions</label
+        >
+        <br />
+
+        <input id="submit-btn-create" type="submit" />
+        <input id="reset-btn-create" type="reset" />
+      </form>
+    </dialog> -->
+
+    <article id="dialog">
+      <dialog id="postsDialog">
+        <img id="dialog-image" src="" />
+
+        <h2 id="dialog-header"></h2>
+        <h3 id="dialog-subheader"></h3>
+        <p id="dialog-description"></p>
+        <form method="dialog">
+          <div id="close-btn" class="buttons">
+            <button id="button">Close</button>
+          </div>
+        </form>
+      </dialog>
+    </article>
+
+    <header>
+      POSTS
+      <div><button id="btn-create">Create Post</button></div>
+    </header>
+    <main>
+      <section id="posts" class="grid-container"></section>
+      <section id="buttons" class="grid-container"></section>
+      <section id="users" class="grid-container"></section>
+    </main>
+    <footer>Database-App by MACA</footer>
     <script src="script.js"></script>
   </body>
 </html>
