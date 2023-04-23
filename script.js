@@ -21,12 +21,24 @@ async function start() {
   const postString = stringify(["Ford", "BMW", "Audi", "Fiat", "VW"]);
   console.log(postString);
 
-  //   document
-  //     .querySelector("form#form-create")
-  //     .addEventListener("submit", clickSubmit);
+  document
+    .querySelector("form#form-create")
+    .addEventListener("submit", clickSubmit);
 
-  //   document
-  //     .querySelector("#TC-create-checkbox")
+  document
+    .querySelector("#image-create")
+    .addEventListener("change", function (event) {
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = function () {
+        document
+          .querySelector("#preview-image-create")
+          .setAttribute("src", reader.result);
+      };
+    });
+
+  //document.querySelector("#TC-create-checkbox")
   //     .addEventListener("click", clickAccept);
 }
 
@@ -45,25 +57,35 @@ function clickSubmit(event) {
 
   console.log("Submit clicked");
   const elements = document.querySelector("form#form-create").elements;
-  const signup = {
-    fullname: elements.namedItem("fullName").value,
-    email: elements.namedItem("email").value,
-    username: elements.namedItem("username").value,
-    password: elements.namedItem("password").value,
-    payment: elements.namedItem("payment").value,
-    payEvery: elements.namedItem("payEvery").value,
-    spam: elements.namedItem("spam").value,
+
+  const file = elements.namedItem("image").files[0]; // get the selected file
+  const reader = new FileReader(); // create a FileReader object
+
+  // set up a callback to be called when the file is loaded
+  reader.onload = () => {
+    const post = {
+      title: elements.namedItem("title").value,
+      body: elements.namedItem("body").value,
+      image: reader.result, // set the image property to the data URL
+    };
+    console.log(post);
+    createPost(post.title, post.body, post.image);
   };
-  console.log(signup);
+
+  // read the file as a data URL
+  reader.readAsDataURL(file);
 }
 
 function createPostClicked() {
-  const randomNumber = Math.floor(Math.random() * 100 + 1);
-  const title = `My post number: ${randomNumber}`;
-  const body = "Ellaborate description of my awesome post";
-  const image =
-    "https://img.freepik.com/free-photo/face-expressions-illustrations-emotions-feelings_53876-125619.jpg?w=1380&t=st=1681899851~exp=1681900451~hmac=9f1c242ac4c6defdcb69846928ce96a98ac8c1210d9350f8c0b0b9385a8ea406";
-  createPost(title, body, image);
+  document.querySelector("#create-post").showModal();
+  document.querySelector("#create-post").scrollTop = 0;
+
+  //   const randomNumber = Math.floor(Math.random() * 100 + 1);
+  //   const title = `My post number: ${randomNumber}`;
+  //   const body = "Ellaborate description of my awesome post";
+  //   const image =
+  //     "https://img.freepik.com/free-photo/face-expressions-illustrations-emotions-feelings_53876-125619.jpg?w=1380&t=st=1681899851~exp=1681900451~hmac=9f1c242ac4c6defdcb69846928ce96a98ac8c1210d9350f8c0b0b9385a8ea406";
+  //   createPost(title, body, image);
 }
 
 async function updatePostsGrid() {
