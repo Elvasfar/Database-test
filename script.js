@@ -14,12 +14,12 @@ async function start() {
     .querySelector("#btn-create")
     .addEventListener("click", createPostClicked);
 
-  const postObject = parseJSONString(
-    '{"title": "This is my awesome title", "image": "https://share.cederdorff.com/images/petl.jpg" }'
-  );
-  console.log(postObject);
-  const postString = stringify(["Ford", "BMW", "Audi", "Fiat", "VW"]);
-  console.log(postString);
+  //   const postObject = parseJSONString(
+  //     '{"title": "This is my awesome title", "image": "https://share.cederdorff.com/images/petl.jpg" }'
+  //   );
+  //   console.log(postObject);
+  //   const postString = stringify(["Ford", "BMW", "Audi", "Fiat", "VW"]);
+  //   console.log(postString);
 
   document
     .querySelector("form#form-create")
@@ -46,6 +46,9 @@ async function start() {
     const dialog = document.querySelector("#create-post");
     dialog.close();
   });
+  document
+    .querySelector("#posts article:last-child .btn-delete")
+    .addEventListener("click", deleteClicked);
 }
 
 function clickAccept(event) {
