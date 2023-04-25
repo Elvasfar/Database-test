@@ -10,7 +10,7 @@
   </head>
   <body>
     <dialog id="create-post">
-      <button id="create-close-btn">X</button>
+      <button id="create-close-btn">X</button> <br /><br />
       <form
         action="https://console.firebase.google.com/project/database---app-2/database/database---app-2-default-rtdb/data/~2F/posts.json"
         method="POST"
@@ -19,19 +19,14 @@
         <label for="title-create">Title</label>
         <input id="title-create" name="title" type="text" required />
         <label for="body-create">Description</label>
-        <input
-          id="body-create"
-          name="body"
-          type="text"
-          width="48"
-          height="48"
-        />
+        <textarea name="body" id="" cols="30" rows="10"></textarea>
+        <br />
         <fieldset>
           <legend>Picture</legend>
           <img id="preview-image-create" src="" alt="" />
           <input id="image-create" name="image" type="file" accept="image/*" />
         </fieldset>
-        <br />
+
         <input id="submit-btn-create" type="submit" />
         <input id="reset-btn-create" type="reset" />
       </form>

@@ -40,6 +40,12 @@ async function start() {
 
   //document.querySelector("#TC-create-checkbox")
   //     .addEventListener("click", clickAccept);
+
+  const closeButton = document.querySelector("#create-close-btn");
+  closeButton.addEventListener("click", function () {
+    const dialog = document.querySelector("#create-post");
+    dialog.close();
+  });
 }
 
 function clickAccept(event) {

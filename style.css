@@ -154,3 +154,13 @@ div {
   padding-left: 100px;
   padding-right: 100px;
 }
+#create-close-btn {
+  background-color: whitesmoke;
+  border-color: darkolivegreen;
+  font-size: small;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+  cursor: pointer;
+  align-content: right;
+  align-items: right;
+}
