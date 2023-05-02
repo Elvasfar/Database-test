@@ -1,12 +1,20 @@
 "use strict";
 
+import {
+  deletePost,
+  updatePost,
+  createPost,
+  getPosts,
+  getUsers,
+  preparePostData,
+  prepareUserData,
+} from "../rest-service";
+
 window.addEventListener("load", start);
 // -- global variabel til databasen -- //
 const endpoint = "https://database---app-2-default-rtdb.firebaseio.com/";
 let posts;
 async function start() {
-  console.log("Databaseapp kører");
-
   // -- Kalder funktioner til visning af posts og users --//
   updatePostsGrid();
   updateUsersGrid();
@@ -80,37 +88,6 @@ document
     };
   });
 
-function clickSubmit(event) {
-  event.preventDefault();
-
-  console.log("Submit clicked");
-  const elements = document.querySelector("form#form-create").elements;
-
-  const file = elements.namedItem("image").files[0]; // get the selected file
-  const reader = new FileReader(); // create a FileReader object
-
-  // set up a callback to be called when the file is loaded
-  reader.onload = () => {
-    const post = {
-      title: elements.namedItem("title").value,
-      body: elements.namedItem("body").value,
-      image: reader.result, // set the image property to the data URL
-    };
-    console.log(post);
-    createPost(post.title, post.body, post.image);
-    document.querySelector("#create-post").close(); // close dialog
-  };
-
-  // read the file as a data URL
-  reader.readAsDataURL(file);
-}
-
-function createPostClicked() {
-  //-- Åbner dialog og scroller automatisk til toppen af vinduet --//
-  document.querySelector("#create-post").showModal();
-  document.querySelector("#create-post").scrollTop = 0;
-}
-
 async function updatePostsGrid(filteredPosts) {
   // -- "Tømmer/resetter HTML'en, afventer data fra getPost funktionen og kalder showPosts for alle objekter i Array'et" --//
   document.querySelector("#posts").innerHTML = "";
@@ -122,53 +99,12 @@ async function updatePostsGrid(filteredPosts) {
     posts.forEach(showPosts);
   }
 }
-async function getPosts() {
-  // -- Fetcher posts fra databasen, sender dem videre til preparePostData-funktionen og returnerer svaret --//
-  const response = await fetch(`${endpoint}/posts.json`);
-  const data = await response.json();
-  console.log(data);
-  posts = preparePostData(data);
-  console.log(posts);
-  return posts;
-}
 
 async function updateUsersGrid() {
   const users = await getUsers(`${endpoint}/users.json`);
   users.forEach(showUsers);
 }
 
-async function getUsers() {
-  const response = await fetch(`${endpoint}/users.json`);
-  const data = await response.json();
-  console.log(data);
-  const users = prepareUserData(data);
-  console.log(users);
-  return users;
-}
-
-function preparePostData(dataObject) {
-  const newArray = [];
-  for (const key in dataObject) {
-    const post = dataObject[key];
-    post.id = key;
-    console.log(post);
-    newArray.push(post);
-  }
-  console.log(newArray);
-  return newArray;
-}
-
-function prepareUserData(dataObject) {
-  const newArray2 = [];
-  for (const key in dataObject) {
-    const user = dataObject[key];
-    user.id = key;
-    console.log(user);
-    newArray2.push(user);
-  }
-  console.log(newArray2);
-  return newArray2;
-}
 async function showPosts(post) {
   //-- Indsætter et HTML-element for hvert post --//
   document.querySelector("#posts").insertAdjacentHTML(
@@ -216,13 +152,10 @@ async function showPosts(post) {
     .addEventListener("click", postClicked);
 
   function postClicked(event) {
-    console.log(post);
-
     if (event.target.tagName === "BUTTON") {
       // If the click target is a button, don't open the dialog
       return;
     }
-
     document.querySelector("#dialog-header").textContent = post.title;
     document.querySelector("#dialog-description").textContent = post.body;
     document.querySelector("#dialog-image").src = post.image;
@@ -255,7 +188,6 @@ function showUsers(user) {
     .addEventListener("click", userClicked);
 
   function userClicked() {
-    console.log(user);
     document.querySelector("#dialog-header").textContent = user.name;
     document.querySelector("#dialog-subheader").textContent = user.title;
     document.querySelector("#dialog-description").textContent = user.mail;
@@ -265,13 +197,53 @@ function showUsers(user) {
   }
 }
 
-function deletePostClicked(event) {
-  const id = event.target.getAttribute("data-id");
-  deletePost(id);
-  console.log(id);
+// CREATE //
+
+async function clickSubmit(event) {
+  event.preventDefault();
+  const elements = document.querySelector("form#form-create").elements;
+
+  const file = elements.namedItem("image").files[0]; // get the selected file
+  const reader = new FileReader(); // create a FileReader object
+
+  // set up a callback to be called when the file is loaded
+  reader.onload = () => {
+    const post = {
+      title: elements.namedItem("title").value,
+      body: elements.namedItem("body").value,
+      image: reader.result, // set the image property to the data URL
+    };
+    document.querySelector("#create-post").close(); // close dialog
+  };
+
+  const response = await createPost(post.title, post.body, post.image);
+  if (response.ok) {
+    console.log("New post added");
+    updatePostsGrid();
+  }
+
+  // read the file as a data URL
+  reader.readAsDataURL(file);
 }
 
-function updatePostClicked(event) {
+function createPostClicked() {
+  //-- Åbner dialog og scroller automatisk til toppen af vinduet --//
+  document.querySelector("#create-post").showModal();
+  document.querySelector("#create-post").scrollTop = 0;
+}
+
+// DELETE //
+async function deletePostClicked(event) {
+  const id = event.target.getAttribute("data-id");
+  const response = await deletePost(id);
+  if (response.ok) {
+    console.log("post succesfully deleted");
+    updatePostsGrid();
+  }
+}
+
+// UPDATE //
+async function updatePostClicked(event) {
   event.preventDefault();
   const form = event.target;
   const id = form.id.value;
@@ -292,50 +264,11 @@ function updatePostClicked(event) {
       body,
       image: reader.result,
     };
-    updatePost(id, post);
   };
-}
-
-async function createPost(title, body, image) {
-  const newPost = { title, body, image };
-  console.log(newPost);
-  const newPostJson = JSON.stringify(newPost);
-  const response = await fetch(`${endpoint}/posts.json`, {
-    method: "POST",
-    body: newPostJson,
-  });
-  console.log(response);
-  //const data = await response.json();
-  //console.log(data);
+  const response = await updatePost(id, post);
   if (response.ok) {
-    console.log("New post added");
-    updatePostsGrid();
-  }
-}
-
-// === UPDATE (PUT) === //
-async function updatePost(id, post) {
-  const postAsJson = JSON.stringify(post);
-  const url = `${endpoint}/posts/${id}.json`;
-
-  const response = await fetch(url, { method: "PUT", body: postAsJson });
-  const data = await response.json();
-
-  if (response.ok) {
-    console.log("Post is successfully updated");
     updatePostsGrid();
     document.querySelector("#update-post").close();
-  }
-}
-
-// === DELETE (DELETE) === //
-async function deletePost(id) {
-  const url = `${endpoint}/posts/${id}.json`;
-  const response = await fetch(url, { method: "DELETE" });
-  console.log(response);
-  if (response.ok) {
-    console.log("post succesfully deleted");
-    updatePostsGrid();
   }
 }
 
@@ -398,7 +331,6 @@ function searchedPosts(posts) {
     const body = post.body.toLowerCase();
     return title.includes(searchValue) || body.includes(searchValue);
   });
-  console.log(filteredPosts);
   document.querySelector("#posts").innerHTML = "";
   filteredPosts.forEach(showPosts);
 }
