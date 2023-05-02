@@ -1,65 +1,84 @@
 "use strict";
 
 window.addEventListener("load", start);
-
-const endpoint = "https://database---app-2-default-rtdb.firebaseio.com";
-
+// -- global variabel til databasen -- //
+const endpoint = "https://database---app-2-default-rtdb.firebaseio.com/";
+let posts;
 async function start() {
   console.log("Databaseapp kører");
 
+  // -- Kalder funktioner til visning af posts og users --//
   updatePostsGrid();
   updateUsersGrid();
 
+  // -- Evenlisteners på knapper -- //
   document
     .querySelector("#btn-create")
     .addEventListener("click", createPostClicked);
 
-  //   const postObject = parseJSONString(
-  //     '{"title": "This is my awesome title", "image": "https://share.cederdorff.com/images/petl.jpg" }'
-  //   );
-  //   console.log(postObject);
-  //   const postString = stringify(["Ford", "BMW", "Audi", "Fiat", "VW"]);
-  //   console.log(postString);
-
   document
     .querySelector("form#form-create")
     .addEventListener("submit", clickSubmit);
-
   document
-    .querySelector("#image-create")
-    .addEventListener("change", function (event) {
-      const file = event.target.files[0];
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = function () {
-        document
-          .querySelector("#preview-image-create")
-          .setAttribute("src", reader.result);
-      };
-    });
+    .querySelector("form#form-delete-post")
+    .addEventListener("submit", deletePostClicked);
+  document
+    .querySelector("#form-update")
+    .addEventListener("submit", updatePostClicked);
 
-  //document.querySelector("#TC-create-checkbox")
-  //     .addEventListener("click", clickAccept);
+  const closeButtonDelete = document.querySelector("#btn-cancel");
+  closeButtonDelete.addEventListener("click", function () {
+    const dialogClose = document.querySelector("#dialog-delete-post");
+    dialogClose.close();
+  });
 
   const closeButton = document.querySelector("#create-close-btn");
   closeButton.addEventListener("click", function () {
     const dialog = document.querySelector("#create-post");
     dialog.close();
   });
-  document
-    .querySelector("#posts article:last-child .btn-delete")
-    .addEventListener("click", deleteClicked);
-}
 
-function clickAccept(event) {
-  console.log("Accept changed");
-  console.log(event.target.checked);
-  if (event.target.checked === true) {
-    document.querySelector("#submit-btn-create").disabled = false;
-  } else {
-    document.querySelector("#submit-btn-create").disabled = true;
-  }
+  const closeButtonUpdate = document.querySelector("#update-close-btn");
+  closeButtonUpdate.addEventListener("click", function () {
+    const dialog = document.querySelector("#update-post");
+    dialog.close();
+  });
+
+  const selectElement = document.getElementById("sort-by");
+  selectElement.addEventListener("change", handleUserInput);
+
+  const searchValue = document.getElementById("search-filter");
+  searchValue.addEventListener("change", async function () {
+    const posts = await getPosts(`${endpoint}/posts.json`);
+    searchedPosts(posts);
+  });
 }
+// -- eventlistener til at vise preview-image på create-post og update-post -- //
+document
+  .querySelector("#image-create")
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      document
+        .querySelector("#preview-image-create")
+        .setAttribute("src", reader.result);
+    };
+  });
+
+document
+  .querySelector("#image-update")
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      document
+        .querySelector("#preview-image-update")
+        .setAttribute("src", reader.result);
+    };
+  });
 
 function clickSubmit(event) {
   event.preventDefault();
@@ -79,6 +98,7 @@ function clickSubmit(event) {
     };
     console.log(post);
     createPost(post.title, post.body, post.image);
+    document.querySelector("#create-post").close(); // close dialog
   };
 
   // read the file as a data URL
@@ -86,28 +106,28 @@ function clickSubmit(event) {
 }
 
 function createPostClicked() {
+  //-- Åbner dialog og scroller automatisk til toppen af vinduet --//
   document.querySelector("#create-post").showModal();
   document.querySelector("#create-post").scrollTop = 0;
-
-  //   const randomNumber = Math.floor(Math.random() * 100 + 1);
-  //   const title = `My post number: ${randomNumber}`;
-  //   const body = "Ellaborate description of my awesome post";
-  //   const image =
-  //     "https://img.freepik.com/free-photo/face-expressions-illustrations-emotions-feelings_53876-125619.jpg?w=1380&t=st=1681899851~exp=1681900451~hmac=9f1c242ac4c6defdcb69846928ce96a98ac8c1210d9350f8c0b0b9385a8ea406";
-  //   createPost(title, body, image);
 }
 
-async function updatePostsGrid() {
+async function updatePostsGrid(filteredPosts) {
+  // -- "Tømmer/resetter HTML'en, afventer data fra getPost funktionen og kalder showPosts for alle objekter i Array'et" --//
   document.querySelector("#posts").innerHTML = "";
   const posts = await getPosts(`${endpoint}/posts.json`);
-  posts.forEach(showPosts);
-}
 
+  if (filteredPosts) {
+    filteredPosts.forEach(showPosts);
+  } else {
+    posts.forEach(showPosts);
+  }
+}
 async function getPosts() {
+  // -- Fetcher posts fra databasen, sender dem videre til preparePostData-funktionen og returnerer svaret --//
   const response = await fetch(`${endpoint}/posts.json`);
   const data = await response.json();
   console.log(data);
-  const posts = preparePostData(data);
+  posts = preparePostData(data);
   console.log(posts);
   return posts;
 }
@@ -149,39 +169,46 @@ function prepareUserData(dataObject) {
   console.log(newArray2);
   return newArray2;
 }
-
 async function showPosts(post) {
+  //-- Indsætter et HTML-element for hvert post --//
   document.querySelector("#posts").insertAdjacentHTML(
     "beforeend",
     `
         <article class="grid-item">
         <img id="grid-item-image"src="${post.image}" alt""/>
         <div><h2>${post.title}</h2> <br> <p>${post.body}</p>
-            <button class="btn-delete">Delete</button>
-            <button class="btn-update">Update</button>
+            <button class="btn-delete" data-id="${post.id}">Delete</button>
+            <button class="btn-update" data-id="${post.id}">Update</button>
         </div>
         </div> 
         
         </article>
         `
   );
-
+  //-- eventlistenere på knapperne i hvert post som kalder deleteClicked og updateClicked --//
   document
     .querySelector("#posts article:last-child .btn-delete")
     .addEventListener("click", deleteClicked);
   document
     .querySelector("#posts article:last-child .btn-update")
     .addEventListener("click", updateClicked);
-  function deleteClicked() {
-    deletePost(post.id);
-  }
 
+  function deleteClicked() {
+    //-- Åbner dialog med det pågældende posts properties for title og id --//
+    document.querySelector("#dialog-delete-post-title").textContent =
+      post.title;
+    document
+      .querySelector("#form-delete-post")
+      .setAttribute("data-id", post.id);
+    document.querySelector("#dialog-delete-post").showModal();
+  }
   function updateClicked() {
-    const title = `${post.title}`;
-    const body = "I can now update post with hardcoded data!!";
-    const image =
-      "https://th.bing.com/th/id/R.24aa4d964d999a6a109664bdd8659839?rik=ffbxrpqMvIcuag&riu=http%3a%2f%2ftruediscipleship.com%2fwp-content%2fuploads%2f2016%2f07%2fparty-2.jpg&ehk=R6o%2fmUH%2bEp%2bI%2f0TsKKx%2bTqU7hk5ngY3XBqLi1Un%2fsJI%3d&risl=&pid=ImgRaw&r=0";
-    updatePost(post.id, title, body, image);
+    const updateForm = document.querySelector("#form-update");
+    updateForm.id.value = post.id;
+    updateForm.title.value = post.title;
+    updateForm.body.value = post.body;
+    document.querySelector("#preview-image-update").src = post.image;
+    document.querySelector("#update-post").showModal();
   }
 
   document
@@ -238,6 +265,37 @@ function showUsers(user) {
   }
 }
 
+function deletePostClicked(event) {
+  const id = event.target.getAttribute("data-id");
+  deletePost(id);
+  console.log(id);
+}
+
+function updatePostClicked(event) {
+  event.preventDefault();
+  const form = event.target;
+  const id = form.id.value;
+  const title = form.title.value;
+  const body = form.body.value;
+  const image = form.image.files[0];
+
+  if (!image) {
+    alert("Please select an image.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.readAsDataURL(image);
+  reader.onload = function () {
+    const post = {
+      title,
+      body,
+      image: reader.result,
+    };
+    updatePost(id, post);
+  };
+}
+
 async function createPost(title, body, image) {
   const newPost = { title, body, image };
   console.log(newPost);
@@ -256,18 +314,17 @@ async function createPost(title, body, image) {
 }
 
 // === UPDATE (PUT) === //
-async function updatePost(id, title, body, image) {
-  const postToUpdate = { title, body, image };
-  const postAsJson = JSON.stringify(postToUpdate);
+async function updatePost(id, post) {
+  const postAsJson = JSON.stringify(post);
   const url = `${endpoint}/posts/${id}.json`;
 
   const response = await fetch(url, { method: "PUT", body: postAsJson });
   const data = await response.json();
-  console.log(data);
 
   if (response.ok) {
-    console.log("Post is succesfully updated");
+    console.log("Post is successfully updated");
     updatePostsGrid();
+    document.querySelector("#update-post").close();
   }
 }
 
@@ -282,15 +339,65 @@ async function deletePost(id) {
   }
 }
 
-// JSON - Methods ... Øvelser //
-function parseJSONString(string) {
-  const parsedString = JSON.parse(string);
-  console.log(parsedString);
-  return parsedString;
+// Filtered posts //
+
+function handleUserInput() {
+  const selectElement = document.getElementById("sort-by");
+  const selectedValue = selectElement.value;
+
+  if (selectedValue === "title") {
+    const sortedPosts = sortPostsByTitle(posts);
+    updatePostsGrid(sortedPosts);
+  } else if (selectedValue === "body") {
+    const sortedPosts = sortPostsByBody(posts);
+    updatePostsGrid(sortedPosts);
+  } else {
+    updatePostsGrid();
+  }
 }
 
-function stringify(object) {
-  const stringedObject = JSON.stringify(object);
-  console.log(stringedObject);
-  return stringedObject;
+function sortPostsByTitle(posts) {
+  const filteredPostsByTitle = posts.sort((a, b) => {
+    const titleA = a.title.toUpperCase();
+    const titleB = b.title.toUpperCase();
+    if (titleA < titleB) {
+      return -1;
+    }
+    if (titleA > titleB) {
+      return 1;
+    }
+    return 0;
+  });
+  return filteredPostsByTitle;
+}
+
+function sortPostsByBody(posts) {
+  const filteredPostsByBody = posts.sort((a, b) => {
+    const bodyA = a.body.toUpperCase();
+    const bodyB = b.body.toUpperCase();
+    if (bodyA < bodyB) {
+      return -1;
+    }
+    if (bodyA > bodyB) {
+      return 1;
+    }
+    return 0;
+  });
+  return filteredPostsByBody;
+}
+
+function searchOption() {
+  const searchValue = document.getElementById("search-filter").value;
+  return searchValue;
+}
+
+function searchedPosts(posts) {
+  const searchValue = searchOption();
+  const filteredPosts = posts.filter((post) => {
+    const title = post.title.toLowerCase();
+    const body = post.body.toLowerCase();
+    return title.includes(searchValue) || body.includes(searchValue);
+  });
+  console.log(filteredPosts);
+  updatePostsGrid(filteredPosts);
 }

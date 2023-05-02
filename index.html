@@ -10,7 +10,10 @@
   </head>
   <body>
     <dialog id="create-post">
-      <button id="create-close-btn">X</button> <br /><br />
+      <button id="create-close-btn">X</button>
+      <h2>Create Post</h2>
+      <br /><br />
+
       <form
         action="https://console.firebase.google.com/project/database---app-2/database/database---app-2-default-rtdb/data/~2F/posts.json"
         method="POST"
@@ -29,6 +32,37 @@
 
         <input id="submit-btn-create" type="submit" />
         <input id="reset-btn-create" type="reset" />
+      </form>
+    </dialog>
+
+    <!--Dialog - update post-->
+    <dialog id="update-post">
+      <button id="update-close-btn">X</button>
+      <h2>Update Post</h2>
+      <br /><br />
+      <form id="form-update">
+        <input type="hidden" name="id" />
+        <label for="title">Title</label>
+        <input type="text" name="title" required />
+        <label for="body">Body</label>
+        <textarea name="body" required></textarea>
+        <img id="preview-image-update" src="" alt="" />
+        <fieldset>
+          <legend>Picture</legend>
+          <input id="image-update" type="file" name="image" accept="image/*" />
+        </fieldset>
+        <button type="submit" id="submit-btn-update">Update</button>
+        <button type="reset" id="reset-btn-update">Nulstil</button>
+      </form>
+    </dialog>
+
+    <!-- dialog - delete post -->
+    <dialog id="dialog-delete-post">
+      <h2>Do you want to delete post?</h2>
+      <p id="dialog-delete-post-title">Title of post</p>
+      <form method="dialog" id="form-delete-post">
+        <button type="button" id="btn-cancel" class="btn-cancel">No</button>
+        <button>Yes</button>
       </form>
     </dialog>
 
@@ -113,8 +147,18 @@
     </article>
 
     <header>
-      POSTS
+      <div id="header-text">POSTS</div>
       <div><button id="btn-create">Create Post</button></div>
+      <div id="sort-filter">
+        <label for="sort-by" id="sort-by-label">Sort by: </label>
+        <select name="sortering" id="sort-by">
+          <option value="Not selected">Not selected</option>
+          <option value="title">Title</option>
+          <option value="body">Description</option>
+        </select>
+        <label for="search-filter" id="label-search-filter">Search: </label>
+        <input type="search" id="search-filter" name="search-box" />
+      </div>
     </header>
     <main>
       <section id="posts" class="grid-container"></section>

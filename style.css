@@ -3,6 +3,7 @@ header {
   font-weight: bolder;
   text-align: center;
   background-color: darkolivegreen;
+  height: 150px;
 }
 main {
   background-color: blanchedalmond;
@@ -63,6 +64,7 @@ p {
 }
 h2 {
   margin-bottom: 0;
+  text-align: left;
 }
 h3 {
   margin-top: 0;
@@ -163,4 +165,70 @@ div {
   cursor: pointer;
   align-content: right;
   align-items: right;
+}
+
+form#form-update {
+  display: grid;
+  border-color: darkolivegreen;
+  background-color: white;
+  max-width: 800px;
+  align-content: left;
+  grid-template-columns: 1fr 1fr;
+}
+
+#update-post {
+  background-color: whitesmoke;
+  border-color: darkolivegreen;
+}
+
+#sort-by-label {
+  font-size: medium;
+  text-align: right;
+}
+#sort-by {
+  left: 10px;
+  border-color: darkolivegreen;
+}
+
+#sort-filter {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+}
+
+#search-filter {
+  grid-row: 1;
+  grid-column: 7;
+  border-color: darkolivegreen;
+}
+
+#label-search-filter {
+  grid-row: 1;
+  grid-column: 6;
+  font-size: medium;
+  text-align: right;
+}
+
+#header-text {
+  background-image: linear-gradient(to right, #f0c9c9, #a5c0f2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000,
+    -1px 1px 0 #000;
+  font-size: 70px;
+
+  animation-name: slide;
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+}
+
+@keyframes slide {
+  0% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(20px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
