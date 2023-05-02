@@ -48,7 +48,7 @@ async function start() {
   selectElement.addEventListener("change", handleUserInput);
 
   const searchValue = document.getElementById("search-filter");
-  searchValue.addEventListener("change", async function () {
+  searchValue.addEventListener("keydown", async function () {
     const posts = await getPosts(`${endpoint}/posts.json`);
     searchedPosts(posts);
   });
@@ -399,5 +399,6 @@ function searchedPosts(posts) {
     return title.includes(searchValue) || body.includes(searchValue);
   });
   console.log(filteredPosts);
-  updatePostsGrid(filteredPosts);
+  document.querySelector("#posts").innerHTML = "";
+  filteredPosts.forEach(showPosts);
 }
