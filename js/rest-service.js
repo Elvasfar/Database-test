@@ -1,4 +1,5 @@
 const endpoint = "https://database---app-2-default-rtdb.firebaseio.com/";
+let posts;
 
 async function getPosts() {
   // -- Fetcher posts fra databasen, sender dem videre til preparePostData-funktionen og returnerer svaret --//
@@ -15,8 +16,8 @@ async function getUsers() {
   return users;
 }
 
-async function createPost(title, body, image) {
-  const newPost = { title, body, image };
+async function createPost(title, body, image, post) {
+  const newPost = { title, body, image, post };
   const newPostJson = JSON.stringify(newPost);
   const response = await fetch(`${endpoint}/posts.json`, {
     method: "POST",

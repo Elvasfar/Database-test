@@ -8,7 +8,14 @@ import {
   getUsers,
   preparePostData,
   prepareUserData,
-} from "../rest-service";
+} from "./rest-service.js";
+
+import {
+  sortPostsByBody,
+  sortPostsByTitle,
+  searchOption,
+  searchedPosts,
+} from "./helper.js";
 
 window.addEventListener("load", start);
 // -- global variabel til databasen -- //
@@ -58,7 +65,9 @@ async function start() {
   const searchValue = document.getElementById("search-filter");
   searchValue.addEventListener("keydown", async function () {
     const posts = await getPosts(`${endpoint}/posts.json`);
-    searchedPosts(posts);
+    const filteredPosts = searchedPosts(posts);
+    document.querySelector("#posts").innerHTML = "";
+    filteredPosts.forEach(showPosts);
   });
 }
 // -- eventlistener til at vise preview-image på create-post og update-post -- //
@@ -91,7 +100,7 @@ document
 async function updatePostsGrid(filteredPosts) {
   // -- "Tømmer/resetter HTML'en, afventer data fra getPost funktionen og kalder showPosts for alle objekter i Array'et" --//
   document.querySelector("#posts").innerHTML = "";
-  const posts = await getPosts(`${endpoint}/posts.json`);
+  posts = await getPosts(`${endpoint}/posts.json`);
 
   if (filteredPosts) {
     filteredPosts.forEach(showPosts);
@@ -124,34 +133,24 @@ async function showPosts(post) {
   //-- eventlistenere på knapperne i hvert post som kalder deleteClicked og updateClicked --//
   document
     .querySelector("#posts article:last-child .btn-delete")
-    .addEventListener("click", deleteClicked);
+    .addEventListener("click", () => deleteClicked(post));
   document
     .querySelector("#posts article:last-child .btn-update")
-    .addEventListener("click", updateClicked);
-
-  function deleteClicked() {
-    //-- Åbner dialog med det pågældende posts properties for title og id --//
-    document.querySelector("#dialog-delete-post-title").textContent =
-      post.title;
-    document
-      .querySelector("#form-delete-post")
-      .setAttribute("data-id", post.id);
-    document.querySelector("#dialog-delete-post").showModal();
-  }
-  function updateClicked() {
-    const updateForm = document.querySelector("#form-update");
-    updateForm.id.value = post.id;
-    updateForm.title.value = post.title;
-    updateForm.body.value = post.body;
-    document.querySelector("#preview-image-update").src = post.image;
-    document.querySelector("#update-post").showModal();
-  }
+    .addEventListener("click", () => updateClicked(post));
 
   document
     .querySelector("#posts article:last-child")
     .addEventListener("click", postClicked);
 
-  function postClicked(event) {
+  document
+    .querySelectorAll("#posts article:last-child button")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from bubbling up to grid-item
+      });
+    });
+
+  function postClicked(event, post) {
     if (event.target.tagName === "BUTTON") {
       // If the click target is a button, don't open the dialog
       return;
@@ -162,14 +161,21 @@ async function showPosts(post) {
     document.querySelector("#postsDialog").showModal();
     document.querySelector("#postsDialog").scrollTop = 0;
   }
+}
 
-  document
-    .querySelectorAll("#posts article:last-child button")
-    .forEach((button) => {
-      button.addEventListener("click", (event) => {
-        event.stopPropagation(); // Prevent event from bubbling up to grid-item
-      });
-    });
+function deleteClicked(post) {
+  //-- Åbner dialog med det pågældende posts properties for title og id --//
+  document.querySelector("#dialog-delete-post-title").textContent = post.title;
+  document.querySelector("#form-delete-post").setAttribute("data-id", post.id);
+  document.querySelector("#dialog-delete-post").showModal();
+}
+function updateClicked(post) {
+  const updateForm = document.querySelector("#form-update");
+  updateForm.id.value = post.id;
+  updateForm.title.value = post.title;
+  updateForm.body.value = post.body;
+  document.querySelector("#preview-image-update").src = post.image;
+  document.querySelector("#update-post").showModal();
 }
 
 function showUsers(user) {
@@ -198,8 +204,7 @@ function showUsers(user) {
 }
 
 // CREATE //
-
-async function clickSubmit(event) {
+async function clickSubmit(event, post) {
   event.preventDefault();
   const elements = document.querySelector("form#form-create").elements;
 
@@ -207,20 +212,20 @@ async function clickSubmit(event) {
   const reader = new FileReader(); // create a FileReader object
 
   // set up a callback to be called when the file is loaded
-  reader.onload = () => {
+  reader.onload = async () => {
     const post = {
       title: elements.namedItem("title").value,
       body: elements.namedItem("body").value,
       image: reader.result, // set the image property to the data URL
     };
+    const response = await createPost(post.title, post.body, post.image, post);
+    if (response.ok) {
+      console.log("New post added");
+      updatePostsGrid();
+    }
+
     document.querySelector("#create-post").close(); // close dialog
   };
-
-  const response = await createPost(post.title, post.body, post.image);
-  if (response.ok) {
-    console.log("New post added");
-    updatePostsGrid();
-  }
 
   // read the file as a data URL
   reader.readAsDataURL(file);
@@ -258,27 +263,26 @@ async function updatePostClicked(event) {
 
   const reader = new FileReader();
   reader.readAsDataURL(image);
-  reader.onload = function () {
+  reader.onload = async () => {
     const post = {
       title,
       body,
       image: reader.result,
     };
+    const response = await updatePost(id, post);
+    if (response.ok) {
+      updatePostsGrid();
+      document.querySelector("#update-post").close();
+    }
   };
-  const response = await updatePost(id, post);
-  if (response.ok) {
-    updatePostsGrid();
-    document.querySelector("#update-post").close();
-  }
 }
-
-// Filtered posts //
 
 function handleUserInput() {
   const selectElement = document.getElementById("sort-by");
   const selectedValue = selectElement.value;
 
   if (selectedValue === "title") {
+    console.log(posts);
     const sortedPosts = sortPostsByTitle(posts);
     updatePostsGrid(sortedPosts);
   } else if (selectedValue === "body") {
@@ -287,50 +291,4 @@ function handleUserInput() {
   } else {
     updatePostsGrid();
   }
-}
-
-function sortPostsByTitle(posts) {
-  const filteredPostsByTitle = posts.sort((a, b) => {
-    const titleA = a.title.toUpperCase();
-    const titleB = b.title.toUpperCase();
-    if (titleA < titleB) {
-      return -1;
-    }
-    if (titleA > titleB) {
-      return 1;
-    }
-    return 0;
-  });
-  return filteredPostsByTitle;
-}
-
-function sortPostsByBody(posts) {
-  const filteredPostsByBody = posts.sort((a, b) => {
-    const bodyA = a.body.toUpperCase();
-    const bodyB = b.body.toUpperCase();
-    if (bodyA < bodyB) {
-      return -1;
-    }
-    if (bodyA > bodyB) {
-      return 1;
-    }
-    return 0;
-  });
-  return filteredPostsByBody;
-}
-
-function searchOption() {
-  const searchValue = document.getElementById("search-filter").value;
-  return searchValue;
-}
-
-function searchedPosts(posts) {
-  const searchValue = searchOption();
-  const filteredPosts = posts.filter((post) => {
-    const title = post.title.toLowerCase();
-    const body = post.body.toLowerCase();
-    return title.includes(searchValue) || body.includes(searchValue);
-  });
-  document.querySelector("#posts").innerHTML = "";
-  filteredPosts.forEach(showPosts);
 }
