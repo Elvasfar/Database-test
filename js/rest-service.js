@@ -1,5 +1,6 @@
 const endpoint = "https://database---app-2-default-rtdb.firebaseio.com/";
 let posts;
+let users;
 
 async function getPosts() {
   // -- Fetcher posts fra databasen, sender dem videre til preparePostData-funktionen og returnerer svaret --//
@@ -12,7 +13,7 @@ async function getPosts() {
 async function getUsers() {
   const response = await fetch(`${endpoint}/users.json`);
   const data = await response.json();
-  const users = prepareUserData(data);
+  users = prepareUserData(data);
   return users;
 }
 
@@ -27,6 +28,7 @@ async function createPost(title, body, image, post) {
 }
 
 // === UPDATE (PUT) === //
+
 async function updatePost(id, post) {
   const postAsJson = JSON.stringify(post);
   const url = `${endpoint}/posts/${id}.json`;
@@ -36,9 +38,25 @@ async function updatePost(id, post) {
   return response;
 }
 
+async function updateUser(id, user) {
+  const userAsJson = JSON.stringify(user);
+  const url = `${endpoint}/users/${id}.json`;
+
+  const response = await fetch(url, { method: "PUT", body: userAsJson });
+  const data = await response.json();
+  console.log(response);
+  return response;
+}
+
 // === DELETE (DELETE) === //
 async function deletePost(id) {
   const url = `${endpoint}/posts/${id}.json`;
+  const response = await fetch(url, { method: "DELETE" });
+  return response;
+}
+
+async function deleteUser(id) {
+  const url = `${endpoint}/users/${id}.json`;
   const response = await fetch(url, { method: "DELETE" });
   return response;
 }
@@ -71,4 +89,6 @@ export {
   getUsers,
   preparePostData,
   prepareUserData,
+  updateUser,
+  deleteUser,
 };

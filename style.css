@@ -197,13 +197,13 @@ form#form-update {
 
 #search-filter {
   grid-row: 1;
-  grid-column: 7;
+  grid-column: 6;
   border-color: darkolivegreen;
 }
 
 #label-search-filter {
   grid-row: 1;
-  grid-column: 6;
+  grid-column: 5;
   font-size: medium;
   text-align: right;
 }
@@ -231,4 +231,13 @@ form#form-update {
   100% {
     transform: translateX(0);
   }
+}
+
+form#form-update-user {
+  display: grid;
+  border-color: darkolivegreen;
+  background-color: white;
+  max-width: 800px;
+  align-content: left;
+  grid-template-columns: 1fr 1fr;
 }

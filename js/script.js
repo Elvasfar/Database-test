@@ -8,6 +8,8 @@ import {
   getUsers,
   preparePostData,
   prepareUserData,
+  updateUser,
+  deleteUser,
 } from "./rest-service.js";
 
 import {
@@ -43,13 +45,28 @@ async function start() {
   document
     .querySelector("form#form-delete-post")
     .addEventListener("submit", deletePostClicked);
+
+  document
+    .querySelector("form#form-delete-user")
+    .addEventListener("submit", deleteUserClicked);
+
   document
     .querySelector("#form-update")
     .addEventListener("submit", updatePostClicked);
 
+  document
+    .querySelector("#form-update-user")
+    .addEventListener("submit", updateUserClicked);
+
   const closeButtonDelete = document.querySelector("#btn-cancel");
   closeButtonDelete.addEventListener("click", function () {
     const dialogClose = document.querySelector("#dialog-delete-post");
+    dialogClose.close();
+  });
+
+  const closeButtonDeleteUser = document.querySelector("#btn-cancel-user");
+  closeButtonDeleteUser.addEventListener("click", function () {
+    const dialogClose = document.querySelector("#dialog-delete-user");
     dialogClose.close();
   });
 
@@ -62,6 +79,14 @@ async function start() {
   const closeButtonUpdate = document.querySelector("#update-close-btn");
   closeButtonUpdate.addEventListener("click", function () {
     const dialog = document.querySelector("#update-post");
+    dialog.close();
+  });
+
+  const closeButtonUpdateUser = document.querySelector(
+    "#update-user-close-btn"
+  );
+  closeButtonUpdateUser.addEventListener("click", function () {
+    const dialog = document.querySelector("#update-user");
     dialog.close();
   });
 
@@ -110,6 +135,19 @@ document
     reader.onload = function () {
       document
         .querySelector("#preview-image-update")
+        .setAttribute("src", reader.result);
+    };
+  });
+
+document
+  .querySelector("#image-update-user")
+  .addEventListener("change", function (event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      document
+        .querySelector("#preview-image-update-user")
         .setAttribute("src", reader.result);
     };
   });
@@ -206,16 +244,38 @@ function showUsers(user) {
     `
     <article class="grid-item">
     <img id="grid-item-image"src="${user.image}" alt""/>
-    <div><h2>${user.name}</h2> <br> <h3>${user.title}</h3><p>${user.mail}</p></div> 
+    <div><h2>${user.name}</h2> <br> <h3>${user.title}</h3><p>${user.mail}</p>
+                <button class="btn-delete" data-id="${user.id}">Delete</button>
+            <button class="btn-update" data-id="${user.id}">Update</button>
+</div> 
     </article>
     `
   );
 
   document
     .querySelector("#users article:last-child")
-    .addEventListener("click", () => userClicked(user));
+    .addEventListener("click", (event) => userClicked(event, user));
 
-  function userClicked(user) {
+  document
+    .querySelectorAll("#users article:last-child button")
+    .forEach((button) => {
+      button.addEventListener("click", (event) => {
+        event.stopPropagation(); // Prevent event from bubbling up to grid-item
+      });
+    });
+
+  document
+    .querySelector("#users article:last-child .btn-delete")
+    .addEventListener("click", () => deleteClickedUser(user));
+  document
+    .querySelector("#users article:last-child .btn-update")
+    .addEventListener("click", (event) => updateClickedUser(user));
+
+  function userClicked(event, user) {
+    if (event.target.tagName === "BUTTON") {
+      // If the click target is a button, don't open the dialog
+      return;
+    }
     document.querySelector("#dialog-header").textContent = user.name;
     document.querySelector("#dialog-subheader").textContent = user.title;
     document.querySelector("#dialog-description").textContent = user.mail;
@@ -269,7 +329,68 @@ async function deletePostClicked(event) {
   }
 }
 
+async function deleteUserClicked(event) {
+  const id = event.target.getAttribute("data-id");
+  const response = await deleteUser(id);
+  if (response.ok) {
+    console.log("post succesfully deleted");
+    updateUsersGrid();
+  }
+}
+
+function deleteClickedUser(user) {
+  //-- Åbner dialog med det pågældende posts properties for title og id --//
+  document.querySelector("#dialog-delete-user-name").textContent = user.name;
+  document.querySelector("#form-delete-user").setAttribute("data-id", user.id);
+  document.querySelector("#dialog-delete-user").showModal();
+}
+
 // UPDATE //
+
+function updateClickedUser(user) {
+  const updateForm = document.querySelector("#form-update-user");
+  console.log(user.id);
+  updateForm.id.value = user.id;
+  updateForm.name.value = user.name;
+  updateForm.title.value = user.title;
+  updateForm.mail.value = user.mail;
+  document.querySelector("#preview-image-update-user").src = user.image;
+  document.querySelector("#update-user").showModal();
+}
+
+async function updateUserClicked(event) {
+  event.preventDefault();
+  const form = event.target;
+  const id = form.id.value;
+  const title = form.title.value;
+  const name = form.name.value;
+  const mail = form.mail.value;
+  const image = form.image.files[0];
+
+  if (!image) {
+    alert("Please select an image.");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.readAsDataURL(image);
+  reader.onload = async () => {
+    const user = {
+      name,
+      title,
+      mail,
+      image: reader.result,
+    };
+    const response = await updateUser(id, user);
+    console.log(response.status); // Log the status code
+    console.log(response.statusText); // Log the status text
+    if (response.ok) {
+      updateUsersGrid();
+      document.querySelector("#update-user").close();
+    }
+  };
+}
+
 async function updatePostClicked(event) {
   event.preventDefault();
   const form = event.target;

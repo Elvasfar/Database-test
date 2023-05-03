@@ -81,6 +81,41 @@
         </form>
       </dialog>
     </article>
+<!-- dialog - update user -->
+    <dialog id="update-user">
+      <button id="update-user-close-btn">X</button>
+      <h2>Update User</h2>
+      <br /><br />
+      <form id="form-update-user">
+        <input type="hidden" name="id" />
+        <label for="name">Name: </label>
+        <input type="text" name="name" required />
+        <label for="title">Title: </label>
+        <input name="title" required></input>
+        <label for="mail">Mail: </label>
+        <input name="mail" required></input>
+
+        <img id="preview-image-update-user" src="" alt="" />
+        <fieldset>
+          <legend>Picture</legend>
+          <input id="image-update-user" type="file" name="image" accept="image/*" />
+        </fieldset>
+        <button type="submit" id="submit-btn-update-user">Update</button>
+        <button type="reset" id="reset-btn-update-user">Nulstil</button>
+      </form>
+    </dialog>
+<!--dialog - Delete user-->
+    <dialog id="dialog-delete-user">
+      <h2>Do you want to delete this user?</h2>
+      <br />
+      <h3 id="dialog-delete-user-name"></h3>
+      <form method="dialog" id="form-delete-user">
+        <button>Yes</button>
+        <button type="button" id="btn-cancel-user" class="btn-cancel">No</button>
+      </form>
+    </dialog>
+
+
 
     <header>
       <div id="header-text">POSTS</div>
