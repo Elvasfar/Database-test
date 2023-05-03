@@ -149,6 +149,7 @@
     <header>
       <div id="header-text">POSTS</div>
       <div><button id="btn-create">Create Post</button></div>
+      <br />
       <div id="sort-filter">
         <label for="sort-by" id="sort-by-label">Sort posts by: </label>
         <select name="sortering" id="sort-by">
@@ -156,6 +157,14 @@
           <option value="title">Title</option>
           <option value="body">Description</option>
         </select>
+        <label for="user-sort-by" id="sort-by-label">Sort users by: </label>
+        <select name="sortering" id="user-sort-by">
+          <option value="Not selected">Not selected</option>
+          <option value="name">Name</option>
+          <option value="title">Title</option>
+          <option value="mail">Mail</option>
+        </select>
+
         <label for="search-filter" id="label-search-filter">Search: </label>
         <input type="search" id="search-filter" name="search-box" />
       </div>

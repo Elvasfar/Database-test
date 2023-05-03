@@ -47,6 +47,22 @@ function searchedPosts(posts) {
   return filteredPosts;
 }
 
+function searchedUsers(users) {
+  const searchValue = searchOption();
+  const filteredUsers = users.filter((user) => {
+    const name = user.name.toLowerCase();
+    const title = user.title.toLowerCase();
+    const mail = user.mail.toLowerCase();
+    return (
+      name.includes(searchValue) ||
+      title.includes(searchValue) ||
+      mail.includes(searchValue)
+    );
+  });
+
+  return filteredUsers;
+}
+
 function preparePostData(dataObject) {
   const newArray = [];
   for (const key in dataObject) {
@@ -74,4 +90,5 @@ export {
   searchedPosts,
   preparePostData,
   prepareUserData,
+  searchedUsers,
 };

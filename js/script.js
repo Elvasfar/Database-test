@@ -15,12 +15,15 @@ import {
   sortPostsByTitle,
   searchOption,
   searchedPosts,
+  searchedUsers,
 } from "./helper.js";
 
 window.addEventListener("load", start);
 // -- global variabel til databasen -- //
 const endpoint = "https://database---app-2-default-rtdb.firebaseio.com/";
 let posts;
+let users;
+
 async function start() {
   // -- Kalder funktioner til visning af posts og users --//
   updatePostsGrid();
@@ -62,12 +65,23 @@ async function start() {
   const selectElement = document.getElementById("sort-by");
   selectElement.addEventListener("change", handleUserInput);
 
+  const selectElement2 = document.getElementById("user-sort-by");
+  selectElement2.addEventListener("change", handleUserInput2);
+
   const searchValue = document.getElementById("search-filter");
   searchValue.addEventListener("keydown", async function () {
     const posts = await getPosts(`${endpoint}/posts.json`);
     const filteredPosts = searchedPosts(posts);
     document.querySelector("#posts").innerHTML = "";
     filteredPosts.forEach(showPosts);
+  });
+
+  const searchValue2 = document.getElementById("search-filter");
+  searchValue2.addEventListener("keydown", async function () {
+    const users = await getUsers(`${endpoint}/users.json`);
+    const filteredUsers = searchedUsers(users);
+    document.querySelector("#users").innerHTML = "";
+    filteredUsers.forEach(showUsers);
   });
 }
 // -- eventlistener til at vise preview-image på create-post og update-post -- //
@@ -109,9 +123,14 @@ async function updatePostsGrid(filteredPosts) {
   }
 }
 
-async function updateUsersGrid() {
-  const users = await getUsers(`${endpoint}/users.json`);
-  users.forEach(showUsers);
+async function updateUsersGrid(filteredUsers) {
+  document.querySelector("#users").innerHTML = "";
+  users = await getUsers(`${endpoint}/users.json`);
+  if (filteredUsers) {
+    filteredUsers.forEach(showPosts);
+  } else {
+    users.forEach(showPosts);
+  }
 }
 
 async function showPosts(post) {
@@ -290,5 +309,24 @@ function handleUserInput() {
     updatePostsGrid(sortedPosts);
   } else {
     updatePostsGrid();
+  }
+}
+
+function handleUserInput2() {
+  const selectElement = document.getElementById("user-sort-by");
+  const selectedValue = selectElement.value;
+
+  if (selectedValue === "name") {
+    console.log(posts);
+    const sortedUsers = sortUsersByTitle(users);
+    updateUsersGrid(sortedUsers);
+  } else if (selectedValue === "title") {
+    const sortedUsers = sortUsersByMail(users);
+    updateUsersGrid(sortedUsers);
+  } else if (selectedValue === "mail") {
+    const sortedUsers = sortUsersByMail(users);
+    updateUsersGrid(sortedUsers);
+  } else {
+    updateUsersGrid();
   }
 }

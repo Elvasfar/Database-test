@@ -3,7 +3,7 @@ header {
   font-weight: bolder;
   text-align: center;
   background-color: darkolivegreen;
-  height: 150px;
+  height: 190px;
 }
 main {
   background-color: blanchedalmond;
@@ -192,7 +192,7 @@ form#form-update {
 
 #sort-filter {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 #search-filter {
