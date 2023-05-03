@@ -13,6 +13,9 @@ import {
 import {
   sortPostsByBody,
   sortPostsByTitle,
+  sortUsersByMail,
+  sortUsersByName,
+  sortUsersByTitle,
   searchOption,
   searchedPosts,
   searchedUsers,
@@ -127,9 +130,9 @@ async function updateUsersGrid(filteredUsers) {
   document.querySelector("#users").innerHTML = "";
   users = await getUsers(`${endpoint}/users.json`);
   if (filteredUsers) {
-    filteredUsers.forEach(showPosts);
+    filteredUsers.forEach(showUsers);
   } else {
-    users.forEach(showPosts);
+    users.forEach(showUsers);
   }
 }
 
@@ -159,7 +162,7 @@ async function showPosts(post) {
 
   document
     .querySelector("#posts article:last-child")
-    .addEventListener("click", postClicked);
+    .addEventListener("click", (event) => postClicked(event, post));
 
   document
     .querySelectorAll("#posts article:last-child button")
@@ -210,9 +213,9 @@ function showUsers(user) {
 
   document
     .querySelector("#users article:last-child")
-    .addEventListener("click", userClicked);
+    .addEventListener("click", () => userClicked(user));
 
-  function userClicked() {
+  function userClicked(user) {
     document.querySelector("#dialog-header").textContent = user.name;
     document.querySelector("#dialog-subheader").textContent = user.title;
     document.querySelector("#dialog-description").textContent = user.mail;
@@ -318,10 +321,10 @@ function handleUserInput2() {
 
   if (selectedValue === "name") {
     console.log(posts);
-    const sortedUsers = sortUsersByTitle(users);
+    const sortedUsers = sortUsersByName(users);
     updateUsersGrid(sortedUsers);
   } else if (selectedValue === "title") {
-    const sortedUsers = sortUsersByMail(users);
+    const sortedUsers = sortUsersByTitle(users);
     updateUsersGrid(sortedUsers);
   } else if (selectedValue === "mail") {
     const sortedUsers = sortUsersByMail(users);
