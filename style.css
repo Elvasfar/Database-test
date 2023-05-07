@@ -192,18 +192,25 @@ form#form-update {
 
 #sort-filter {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
 }
 
 #search-filter {
   grid-row: 1;
-  grid-column: 6;
+  grid-column: 8;
   border-color: darkolivegreen;
 }
 
 #label-search-filter {
   grid-row: 1;
-  grid-column: 5;
+  grid-column: 7;
+  font-size: medium;
+  text-align: right;
+}
+
+#filter-by-label {
+  grid-row: 1;
+  grid-column: 1;
   font-size: medium;
   text-align: right;
 }

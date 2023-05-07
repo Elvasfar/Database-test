@@ -96,6 +96,9 @@ async function start() {
   const selectElement2 = document.getElementById("user-sort-by");
   selectElement2.addEventListener("change", handleUserInput2);
 
+  const selectElement3 = document.getElementById("filter-by");
+  selectElement3.addEventListener("change", handleUserInput3);
+
   const searchValue = document.getElementById("search-filter");
   searchValue.addEventListener("keydown", async function () {
     const posts = await getPosts(`${endpoint}/posts.json`);
@@ -153,7 +156,6 @@ document
   });
 
 async function updatePostsGrid(filteredPosts) {
-  // -- "Tømmer/resetter HTML'en, afventer data fra getPost funktionen og kalder showPosts for alle objekter i Array'et" --//
   document.querySelector("#posts").innerHTML = "";
   posts = await getPosts(`${endpoint}/posts.json`);
 
@@ -167,6 +169,7 @@ async function updatePostsGrid(filteredPosts) {
 async function updateUsersGrid(filteredUsers) {
   document.querySelector("#users").innerHTML = "";
   users = await getUsers(`${endpoint}/users.json`);
+
   if (filteredUsers) {
     filteredUsers.forEach(showUsers);
   } else {
@@ -452,5 +455,23 @@ function handleUserInput2() {
     updateUsersGrid(sortedUsers);
   } else {
     updateUsersGrid();
+  }
+}
+
+function handleUserInput3() {
+  const selectElement = document.getElementById("filter-by");
+  const selectedValue = selectElement.value;
+
+  if (selectedValue === "users") {
+    const filteredPosts = posts.filter((post) => post.id < 0);
+    updatePostsGrid(filteredPosts);
+    updateUsersGrid();
+  } else if (selectedValue === "posts") {
+    const filteredUsers = users.filter((user) => user.id < 0);
+    updateUsersGrid(filteredUsers);
+    updatePostsGrid();
+  } else {
+    updateUsersGrid();
+    updatePostsGrid();
   }
 }

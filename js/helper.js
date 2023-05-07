@@ -86,13 +86,21 @@ function searchOption() {
 
 function searchedPosts(posts) {
   const searchValue = searchOption();
-  const filteredPosts = posts.filter((post) => {
-    const title = post.title.toLowerCase();
-    const body = post.body.toLowerCase();
-    return title.includes(searchValue) || body.includes(searchValue);
-  });
+  const filteredPosts = posts.filter((post) => post.id < 0);
+  const searchedPosts =
+    filteredPosts.length > 0
+      ? filteredPosts.filter((post) => {
+          const title = post.title.toLowerCase();
+          const body = post.body.toLowerCase();
+          return title.includes(searchValue) || body.includes(searchValue);
+        })
+      : posts.filter((post) => {
+          const title = post.title.toLowerCase();
+          const body = post.body.toLowerCase();
+          return title.includes(searchValue) || body.includes(searchValue);
+        });
 
-  return filteredPosts;
+  return searchedPosts;
 }
 
 function searchedUsers(users) {
